@@ -6,9 +6,13 @@
 
 #![no_main] // https://github.com/unicode-org/icu4x/issues/395
 
+use dhat::{Dhat, DhatAlloc};
 use icu_datetime::date::MockDateTime;
 use icu_datetime::{options::style, DateTimeFormat};
 use icu_locid_macros::langid;
+
+#[global_allocator]
+static ALLOCATOR: DhatAlloc = DhatAlloc;
 
 const DATES_ISO: &[&str] = &[
     "2001-09-08T18:46:40:000",
@@ -34,6 +38,7 @@ fn print(_input: &str, _value: Option<usize>) {
 
 #[no_mangle]
 fn main(_argc: isize, _argv: *const *const u8) -> isize {
+    let _dhat = Dhat::start_heap_profiling();
     let lid = langid!("en");
 
     let provider = icu_testdata::get_provider();
