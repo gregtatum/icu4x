@@ -16,3 +16,6 @@
 
 # Ephemeral output of `cargo make wasm`
 wasmpkg/
+
+# Memory profiling output from dhat
+dhat-heap.json
