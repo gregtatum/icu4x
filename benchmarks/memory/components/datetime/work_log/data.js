@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1610056827336,
+  "lastUpdate": 1610133722031,
   "repoUrl": "https://github.com/gregtatum/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -78,6 +78,48 @@ window.BENCHMARK_DATA = {
           {
             "name": "heap total allocations",
             "value": 21780,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          },
+          {
+            "name": "heap at global memory max",
+            "value": 9616,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          },
+          {
+            "name": "heap at end of program execution",
+            "value": 1112,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "distinct": true,
+          "id": "2b7d3644623472d2599a3bcf285d1e3469d56a2a",
+          "message": "Add nightly toolchain",
+          "timestamp": "2021-01-08T13:18:00-06:00",
+          "tree_id": "e110ddfb22823d1c5e577a530a8d6edcd48a0778",
+          "url": "https://github.com/gregtatum/icu4x/commit/2b7d3644623472d2599a3bcf285d1e3469d56a2a"
+        },
+        "date": 1610133719944,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "heap total allocations",
+            "value": 21778,
             "unit": "bytes",
             "biggerIsBetter": false
           },
