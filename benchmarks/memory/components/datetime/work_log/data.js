@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1610134217885,
+  "lastUpdate": 1610139734204,
   "repoUrl": "https://github.com/gregtatum/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -157,6 +157,48 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/gregtatum/icu4x/commit/8c82f51577045a02dead73af8863b5897a9fe1ca"
         },
         "date": 1610134215868,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "heap total allocations",
+            "value": 21778,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          },
+          {
+            "name": "heap at global memory max",
+            "value": 9616,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          },
+          {
+            "name": "heap at end of program execution",
+            "value": 1112,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "distinct": true,
+          "id": "8c82f51577045a02dead73af8863b5897a9fe1ca",
+          "message": "Add dhat as a dev dependency",
+          "timestamp": "2021-01-08T13:26:24-06:00",
+          "tree_id": "ba124938f2a6e9e5f430c6d37e65dae86b465927",
+          "url": "https://github.com/gregtatum/icu4x/commit/8c82f51577045a02dead73af8863b5897a9fe1ca"
+        },
+        "date": 1610139732389,
         "tool": "ndjson",
         "benches": [
           {
