@@ -1,0 +1,6 @@
+    Finished dev [unoptimized + debuginfo] target(s) in 0.08s
+     Running `target/debug/examples/work_log`
+dhat: Total:     21,642 bytes in 133 blocks
+dhat: At t-gmax: 9,584 bytes in 91 blocks
+dhat: At t-end:  1,112 bytes in 3 blocks
+dhat: The data in dhat-heap.json is viewable with dhat/dh_view.html

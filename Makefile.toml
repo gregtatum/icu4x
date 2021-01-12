@@ -128,3 +128,139 @@ description = "Clean up WASM build artifacts"
 category = "ICU4X WASM"
 command = "rm"
 args = ["-rf", "wasmpkg"]
+
+### Memory
+
+[tasks.bench-memory]
+description = "Run a memory benchmark"
+category = "ICU4X Memory"
+script_runner = "@duckscript"
+script = '''
+    component = set ${1}
+    example = set ${2}
+    os = set ${3}
+
+    usage_message = set "cargo make bench-memory [component] [example] [os - optional]"
+    assert "false${component}" "No \"component\" was provided. Usage: ${usage_message}"
+    assert "false${example}" "No \"example\" was provided. Usage: ${usage_message}"
+
+    fn log
+        echo "[bench-memory] ${1}"
+    end
+
+    original_example_path = set "./${component}/examples/${example}.rs"
+    memory_example_path = set "./${component}/examples/${example}_memory.rs"
+
+    # dhat-rs needs to be manually injected into the code. This function performs
+    # that injection. See https://docs.rs/dhat/0.2.1/dhat/#usage-heap-profiling
+    fn inject_dhat
+        file_exists = is_path_exists ${original_example_path}
+        assert ${file_exists} "The example file ${original_example_path} could not be found."
+
+        log "Creating a new version of the example with memory instrumentation"
+        injection = exec cargo run --package inject_dhat --release -- ${original_example_path}
+        echo ${injection.stderr}
+
+        appendfile ${memory_example_path} ${injection.stdout}
+
+        # Run the example
+        cd ${component}
+        log "Running ${component} example \"${example}\" with memory instrumentation"
+        # --profile bench is an unstable option, which requires the -Z unstable-option
+        # flag, and the +nightly.
+        output = exec cargo +nightly run --example ${example}_memory --profile bench -Z unstable-options
+        cd ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}
+
+        rm ${memory_example_path}
+
+        log "Example's stdout:"
+        echo ${output.stdout}
+
+        log "Example's stderr:"
+        echo ${output.stderr}
+    end
+
+    inject_dhat
+
+    # Filter the stderr to only the dhat log
+    dhat_log = array
+    lines = split ${output.stderr} \n
+    for line in ${lines}
+        if ${line} # Check for blank lines
+            if starts_with ${line} "dhat"
+                array_push ${dhat_log} ${line}
+            end
+        end
+    end
+    dhat_log_length = array_length ${dhat_log}
+    assert_eq ${dhat_log_length} 4 "Expected the dhat log length to be 4 lines"
+
+    # Parse bytes from the raw log, which can look like this:
+    #     dhat: Total:     20,122 bytes in 129 blocks
+    #     dhat: At t-gmax: 9,328 bytes in 90 blocks
+    #     dhat: At t-end:  0 bytes in 0 blocks
+    #     dhat: The data in dhat-heap.json is viewable with dhat/dh_view.html
+
+    _log_json = array_pop ${dhat_log}
+    log_end = array_pop ${dhat_log}
+    log_gmax = array_pop ${dhat_log}
+    log_total = array_pop ${dhat_log}
+
+    fn extract_bytes_from_log
+        preamble = set ${1}
+        text = set ${2}
+
+        value = starts_with ${text} ${preamble}
+        assert ${value} "Expected the dhat log line to start with \"${preamble}\". The full line was: \"${text}\""
+
+        # Extract the number.
+        start = length ${preamble}
+        end = indexof ${text} "bytes"
+        text = substring ${text} ${start} ${end}
+
+        # Clean up the text so it only contains the numbers.
+        text = replace ${text} "," ""
+        text = trim ${text}
+
+        return ${text}
+    end
+
+    log_total = extract_bytes_from_log "dhat: Total:" ${log_total}
+    log_gmax = extract_bytes_from_log "dhat: At t-gmax:" ${log_gmax}
+    log_end = extract_bytes_from_log "dhat: At t-end:" ${log_end}
+
+    # Write out the results to a file.
+    if is_empty ${os}
+        benchmark_dir = set "benchmarks/memory/${component}/${example}"
+    else
+        benchmark_dir = set "benchmarks/memory/${os}/${component}/${example}"
+    end
+
+    output_file = set "${benchmark_dir}/output.ndjson"
+
+    mkdir "${benchmark_dir}"
+
+    fn write_json
+        bytes = set ${1}
+        label = set ${2}
+        # Manually create the JSON, as duckscript is untyped, and will output numbers as strings.
+        json = set "{ \"name\": \"${label}\", \"unit\": \"bytes\", \"value\": ${bytes}, \"biggerIsBetter\": false }\n"
+        appendfile ${output_file} ${json}
+    end
+
+    write_json ${log_total} "heap total allocations"
+    write_json ${log_gmax} "heap at global memory max"
+    write_json ${log_end} "heap at end of program execution"
+
+    # Place the dhat file in a better location.
+    dhat_destination = set "${benchmark_dir}/dhat-heap.json"
+    dhat_source = set "${component}/dhat-heap.json"
+
+    rm "${dhat_destination}"
+    mv "${dhat_source}" "${benchmark_dir}"
+    rm "${dhat_source}"
+
+    log "Memory log:  ${output_file}"
+    log "dhat file:   ${dhat_destination}"
+    log "Viewable in: https://gregtatum.github.io/dhat-viewer/dh_view.html"
+'''
