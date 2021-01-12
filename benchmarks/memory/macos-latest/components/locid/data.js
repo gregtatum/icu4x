@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1610468857519,
+  "lastUpdate": 1610471424590,
   "repoUrl": "https://github.com/gregtatum/icu4x",
   "entries": {
     "Heap – components/locid": [
@@ -203,6 +203,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/gregtatum/icu4x/commit/503d9579e5136bf75746113a1d222253cc4c6fe6"
         },
         "date": 1610468853195,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "syntatically_canonicalize_locales – Total Heap Allocations",
+            "value": 554,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          },
+          {
+            "name": "syntatically_canonicalize_locales – Heap at Global Memory Max",
+            "value": 345,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          },
+          {
+            "name": "syntatically_canonicalize_locales – Heap at End of Program Execution",
+            "value": 0,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          },
+          {
+            "name": "filter_langids – Total Heap Allocations",
+            "value": 1263,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          },
+          {
+            "name": "filter_langids – Heap at Global Memory Max",
+            "value": 742,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          },
+          {
+            "name": "filter_langids – Heap at End of Program Execution",
+            "value": 0,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "distinct": true,
+          "id": "d33026561021e8edff3df54839bcf83017cc76bd",
+          "message": "Add a CI job to collect memory benchmarks\n\nThis uses a custom fork of the benchmarking tool to add support for\nndjson as a tool. This ndjson uses the same format as the internal json\nstructure of the benchmarking tool. This allows for fully customizing\nthe output of the data, and what information is collected.",
+          "timestamp": "2021-01-12T10:50:26-06:00",
+          "tree_id": "4898da1714ec141ecac2f48a89396319962902c9",
+          "url": "https://github.com/gregtatum/icu4x/commit/d33026561021e8edff3df54839bcf83017cc76bd"
+        },
+        "date": 1610471423724,
         "tool": "ndjson",
         "benches": [
           {
