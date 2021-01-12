@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1610471492650,
+  "lastUpdate": 1610471650456,
   "repoUrl": "https://github.com/gregtatum/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -167,6 +167,48 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 117532,
             "range": "± 801",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "distinct": true,
+          "id": "a3570537adb7d074d05ec40263a9b8dd9ba46dcb",
+          "message": "Add a CI job to collect memory benchmarks\n\nThis uses a custom fork of the benchmarking tool to add support for\nndjson as a tool. This ndjson uses the same format as the internal json\nstructure of the benchmarking tool. This allows for fully customizing\nthe output of the data, and what information is collected.",
+          "timestamp": "2021-01-12T11:01:31-06:00",
+          "tree_id": "2bc7d6590af69e9967155a73ac1eb9ca247119b7",
+          "url": "https://github.com/gregtatum/icu4x/commit/a3570537adb7d074d05ec40263a9b8dd9ba46dcb"
+        },
+        "date": 1610471649411,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1649,
+            "range": "± 112",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 7111,
+            "range": "± 562",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 106092,
+            "range": "± 8125",
             "unit": "ns/iter"
           }
         ]
