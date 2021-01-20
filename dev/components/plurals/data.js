@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1610471650456,
+  "lastUpdate": 1611179147477,
   "repoUrl": "https://github.com/gregtatum/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -209,6 +209,48 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 106092,
             "range": "± 8125",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "distinct": true,
+          "id": "6a18d6539c1f5ecc8ce88ab9527963e72d36941d",
+          "message": "Fix yml",
+          "timestamp": "2021-01-20T15:38:58-06:00",
+          "tree_id": "0451c7be2019241c4a8aee71b5da0febd0aa14a2",
+          "url": "https://github.com/gregtatum/icu4x/commit/6a18d6539c1f5ecc8ce88ab9527963e72d36941d"
+        },
+        "date": 1611179146912,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1771,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 7696,
+            "range": "± 33",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 115106,
+            "range": "± 2919",
             "unit": "ns/iter"
           }
         ]
