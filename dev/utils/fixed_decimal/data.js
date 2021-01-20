@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1610471579661,
+  "lastUpdate": 1611179082546,
   "repoUrl": "https://github.com/gregtatum/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -149,6 +149,36 @@ window.BENCHMARK_DATA = {
             "name": "fixed_decimal/overview",
             "value": 175821,
             "range": "± 573",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "tatum.creative@gmail.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "distinct": true,
+          "id": "6a18d6539c1f5ecc8ce88ab9527963e72d36941d",
+          "message": "Fix yml",
+          "timestamp": "2021-01-20T15:38:58-06:00",
+          "tree_id": "0451c7be2019241c4a8aee71b5da0febd0aa14a2",
+          "url": "https://github.com/gregtatum/icu4x/commit/6a18d6539c1f5ecc8ce88ab9527963e72d36941d"
+        },
+        "date": 1611179081992,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 166774,
+            "range": "± 3990",
             "unit": "ns/iter"
           }
         ]
