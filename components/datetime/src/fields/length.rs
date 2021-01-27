@@ -8,7 +8,7 @@ pub enum LengthError {
     TooLong,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub enum FieldLength {
     One = 1,
     TwoDigit = 2,

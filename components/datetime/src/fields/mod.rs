@@ -4,7 +4,7 @@
 mod length;
 mod symbols;
 
-pub use length::FieldLength;
+pub use length::{FieldLength, LengthError};
 pub use symbols::*;
 
 use std::convert::{TryFrom, TryInto};
@@ -14,7 +14,7 @@ pub enum Error {
     TooLong(FieldSymbol),
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub struct Field {
     pub symbol: FieldSymbol,
     pub length: FieldLength,

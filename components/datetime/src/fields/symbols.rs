@@ -8,7 +8,7 @@ pub enum SymbolError {
     Unknown(u8),
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub enum FieldSymbol {
     Year(Year),
     Month(Month),
@@ -37,7 +37,7 @@ impl TryFrom<u8> for FieldSymbol {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub enum Year {
     Calendar,
     WeekOf,
@@ -60,7 +60,7 @@ impl From<Year> for FieldSymbol {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub enum Month {
     Format,
     StandAlone,
@@ -83,7 +83,7 @@ impl From<Month> for FieldSymbol {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub enum Day {
     DayOfMonth,
     DayOfYear,
@@ -110,7 +110,7 @@ impl From<Day> for FieldSymbol {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub enum Hour {
     H11,
     H12,
@@ -137,7 +137,7 @@ impl From<Hour> for FieldSymbol {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub enum Second {
     Second,
     FractionalSecond,
@@ -162,7 +162,7 @@ impl From<Second> for FieldSymbol {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub enum Weekday {
     Format,
     Local,
@@ -187,7 +187,7 @@ impl From<Weekday> for FieldSymbol {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
 pub enum DayPeriod {
     AmPm,
     NoonMidnight,
