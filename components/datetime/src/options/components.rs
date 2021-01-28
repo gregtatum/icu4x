@@ -53,6 +53,8 @@
 //! *Note*: The exact result returned from [`DateTimeFormat`](crate::DateTimeFormat) is a subject to change over
 //! time. Formatted result should be treated as opaque and displayed to the user as-is,
 //! and it is strongly recommended to never write tests that expect a particular formatted output.
+use crate::fields::FieldLength;
+
 use super::preferences;
 #[cfg(all(not(feature = "serialize_none"), feature = "serde"))]
 use serde::{Deserialize, Serialize};
@@ -174,6 +176,19 @@ pub enum Month {
         serde(rename = "narrow")
     )]
     Narrow,
+}
+
+impl Month {
+    pub fn matches_field_length(&self, length: FieldLength) -> bool {
+        length
+            == match self {
+                Month::Numeric => FieldLength::One,
+                Month::TwoDigit => FieldLength::TwoDigit,
+                Month::Short => FieldLength::Abbreviated,
+                Month::Long => FieldLength::Wide,
+                Month::Narrow => FieldLength::Narrow,
+            }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
