@@ -130,6 +130,21 @@ impl From<&cldr_json::StylePatterns> for gregory::patterns::StylePatternsV1 {
     }
 }
 
+impl From<&cldr_json::DateTimeFormats> for gregory::patterns::DateTimeFormatsV1 {
+    fn from(other: &cldr_json::DateTimeFormats) -> Self {
+        // TODO(#308): Support numbering system variations. We currently throw them away.
+        Self {
+            style_patterns: gregory::patterns::StylePatternsV1 {
+                full: other.full.get_pattern().clone(),
+                long: other.long.get_pattern().clone(),
+                medium: other.medium.get_pattern().clone(),
+                short: other.short.get_pattern().clone(),
+            },
+            available_formats: other.available_formats.0.clone(),
+        }
+    }
+}
+
 impl From<&cldr_json::Dates> for gregory::DatesV1 {
     fn from(other: &cldr_json::Dates) -> Self {
         Self {
@@ -390,6 +405,26 @@ pub(self) mod cldr_json {
     }
 
     #[derive(PartialEq, Debug, Deserialize)]
+    pub struct DateTimeFormats {
+        pub full: StylePattern,
+        pub long: StylePattern,
+        pub medium: StylePattern,
+        pub short: StylePattern,
+        #[serde(rename = "availableFormats")]
+        pub available_formats: AvailableFormats,
+    }
+
+    #[derive(PartialEq, Clone, Debug, Deserialize)]
+    pub struct AvailableFormats(
+        #[serde(with = "tuple_vec_map")] pub(crate) Vec<(Cow<'static, str>, Cow<'static, str>)>,
+    );
+
+    /// This struct represents a 1:1 mapping of the CLDR ca-gregorian.json data at the key
+    /// "main.LANGID.dates.calendars.gregorian" where "LANGID" is the identifier.
+    ///
+    /// e.g.
+    /// https://github.com/unicode-org/cldr-json/blob/master/cldr-json/cldr-dates-full/main/en/ca-gregorian.json
+    #[derive(PartialEq, Debug, Deserialize)]
     pub struct GregoryDates {
         pub months: months::Contexts,
         pub days: days::Contexts,
@@ -400,7 +435,7 @@ pub(self) mod cldr_json {
         #[serde(rename = "timeFormats")]
         pub time_formats: StylePatterns,
         #[serde(rename = "dateTimeFormats")]
-        pub date_time_formats: StylePatterns,
+        pub date_time_formats: DateTimeFormats,
     }
 
     #[derive(PartialEq, Debug, Deserialize)]

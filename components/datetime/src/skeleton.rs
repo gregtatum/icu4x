@@ -83,6 +83,7 @@ impl From<FieldSymbol> for char {
             },
             FieldSymbol::DayPeriod(dayperiod) => match dayperiod {
                 fields::DayPeriod::AmPm => 'a',
+                fields::DayPeriod::NoonMidnight => 'b',
             },
             FieldSymbol::Hour(hour) => match hour {
                 fields::Hour::H11 => 'K',

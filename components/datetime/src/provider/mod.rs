@@ -50,7 +50,7 @@ pub mod gregory {
 
         pub time: patterns::StylePatternsV1,
 
-        pub date_time: patterns::StylePatternsV1,
+        pub date_time: patterns::DateTimeFormatsV1,
     }
 
     macro_rules! symbols {
@@ -192,6 +192,16 @@ pub mod gregory {
             pub long: Cow<'static, str>,
             pub medium: Cow<'static, str>,
             pub short: Cow<'static, str>,
+        }
+
+        #[derive(Debug, PartialEq, Clone, Default)]
+        #[cfg_attr(
+            feature = "provider_serde",
+            derive(serde::Serialize, serde::Deserialize)
+        )]
+        pub struct DateTimeFormatsV1 {
+            pub style_patterns: StylePatternsV1,
+            pub available_formats: Vec<(Cow<'static, str>, Cow<'static, str>)>,
         }
     }
 }
