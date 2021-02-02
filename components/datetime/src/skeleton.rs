@@ -7,26 +7,23 @@
 
 use crate::fields::{self, Field, FieldLength, FieldSymbol, LengthError, SymbolError};
 use crate::options::components;
-use serde::{
-    de::{self, Deserialize, Deserializer, Unexpected, Visitor},
-    ser::{self, Serialize},
-};
-use std::convert::TryFrom;
-use std::fmt;
+use std::{borrow::Cow, convert::TryFrom};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct FieldIndex(usize);
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Skeleton {
     fields: Vec<Field>,
+    pattern_string: Cow<'static, str>,
     fields_by_type: FieldsByType,
 }
 
 impl Skeleton {
-    pub fn new() -> Skeleton {
+    pub fn new(pattern_string: Cow<'static, str>) -> Skeleton {
         Skeleton {
             fields: Vec::new(),
+            pattern_string,
             fields_by_type: FieldsByType::new(),
         }
     }
@@ -75,7 +72,63 @@ impl Skeleton {
     }
 }
 
-#[derive(Debug)]
+pub type SkeletonStringTuple = (Cow<'static, str>, Cow<'static, str>);
+
+impl TryFrom<&SkeletonStringTuple> for Skeleton {
+    type Error = SkeletonError;
+    fn try_from(tuple: &SkeletonStringTuple) -> Result<Self, Self::Error> {
+        let (skeleton_string, pattern_string) = tuple;
+        let mut vec = Vec::new();
+        let mut skeleton = Skeleton::new(pattern_string.clone());
+        for byte in skeleton_string.bytes() {
+            match FieldSymbol::try_from(byte) {
+                Ok(symbol) => vec.push(symbol),
+                Err(err) => match byte {
+                    // The short generic non-location format, e.g Pacific Time, or PT
+                    b'v'
+                    // Flexible day periods
+                    | b'B'
+                    // Era
+                    | b'G'
+                    // Quarter
+                    | b'Q'
+                    // Zone
+                    | b'Z'
+                    // Week of Month (numeric)
+                    | b'W'
+                    // Week of Year (numeric)
+                    | b'w'
+                    // "-count-*" and "-alt-variant"
+                    | b'-' => {
+                        return Err(SkeletonError::UnimplementedField(byte as char))
+                    }
+                    _ => return Err(err.into()),
+                },
+            };
+        }
+
+        let mut length: u8 = 0;
+        let mut iter = vec.drain(..).peekable();
+        while let Some(symbol) = iter.next() {
+            length += 1;
+            match iter.peek() {
+                Some(next_symbol) => {
+                    if *next_symbol != symbol {
+                        skeleton.add_field(symbol, length)?;
+                        length = 0;
+                    }
+                }
+                None => {
+                    skeleton.add_field(symbol, length)?;
+                }
+            }
+        }
+
+        Ok(skeleton)
+    }
+}
+
+#[derive(Debug, PartialEq)]
 pub struct FieldsByType {
     year: Option<FieldIndex>,
     month: Option<FieldIndex>,
@@ -187,110 +240,6 @@ impl From<SymbolError> for SkeletonError {
     fn from(symbol_error: SymbolError) -> Self {
         let SymbolError::Unknown(ch) = symbol_error;
         SkeletonError::SymbolUnknown(ch as char)
-    }
-}
-
-impl TryFrom<&str> for Skeleton {
-    type Error = SkeletonError;
-    fn try_from(input: &str) -> Result<Self, Self::Error> {
-        let mut vec = Vec::new();
-        let mut skeleton = Skeleton::new();
-        for byte in input.bytes() {
-            match FieldSymbol::try_from(byte) {
-                Ok(symbol) => vec.push(symbol),
-                Err(err) => match byte {
-                    // The short generic non-location format, e.g Pacific Time, or PT
-                    b'v'
-                    // Flexible day periods
-                    | b'B'
-                    // Era
-                    | b'G'
-                    // Quarter
-                    | b'Q'
-                    // Zone
-                    | b'Z'
-                    // Week of Month (numeric)
-                    | b'W'
-                    // Week of Year (numeric)
-                    | b'w'
-                    // "-count-*" and "-alt-variant"
-                    | b'-' => {
-                        return Err(SkeletonError::UnimplementedField(byte as char))
-                    }
-                    _ => return Err(err.into()),
-                },
-            };
-        }
-
-        let mut length: u8 = 0;
-        let mut iter = vec.drain(..).peekable();
-        while let Some(symbol) = iter.next() {
-            length += 1;
-            match iter.peek() {
-                Some(next_symbol) => {
-                    if *next_symbol != symbol {
-                        skeleton.add_field(symbol, length)?;
-                        length = 0;
-                    }
-                }
-                None => {
-                    skeleton.add_field(symbol, length)?;
-                }
-            }
-        }
-
-        Ok(skeleton)
-    }
-}
-
-// https://serde.rs/deserialize-struct.html
-impl<'de> Deserialize<'de> for Skeleton {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_string(SkeletonVisitor {})
-    }
-}
-
-struct SkeletonVisitor {}
-
-impl<'de> Visitor<'de> for SkeletonVisitor {
-    type Value = Skeleton;
-
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "a valid string skeleton formed from date field symbols: http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table")
-    }
-
-    fn visit_str<E>(self, string: &str) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {
-        Skeleton::try_from(string).map_err(|err| {
-            let msg = match err {
-                SkeletonError::FieldLengthTooLong => {
-                    "The skeleton contained a field that was too long."
-                }
-                SkeletonError::SymbolUnknown(_) => {
-                    "The skeleton contained a symbol that was unknown."
-                }
-                SkeletonError::UnimplementedField(_) => {
-                    "The skeleton contain a field that is not implemented yet."
-                }
-            };
-            de::Error::invalid_value(Unexpected::Other(msg), &self)
-        })
-    }
-}
-
-impl Serialize for Skeleton {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: ser::Serializer,
-    {
-        let string = String::from(self);
-
-        serializer.serialize_str(&string)
     }
 }
 
@@ -438,6 +387,15 @@ pub fn get_best_skeleton(
 #[cfg(test)]
 mod test {
 
+    use icu_locid_macros::langid;
+    use icu_provider::{DataRequest, ResourceOptions, ResourcePath};
+
+    use crate::{
+        fields::{Day, Month, Weekday},
+        provider::{self, gregory::DatesV1, key::GREGORY_V1},
+    };
+    use icu_provider::DataProvider;
+
     use super::*;
 
     const STRING_SKELETONS: [&str; 95] = [
@@ -538,16 +496,28 @@ mod test {
         "yMEd-alt-variant",
     ];
 
-    fn get_skeletons() -> impl Iterator<Item = Result<Skeleton, SkeletonError>> {
-        STRING_SKELETONS
+    fn get_skeletons<'a>(
+        data: &'a provider::gregory::DatesV1,
+    ) -> impl Iterator<Item = Result<Skeleton, SkeletonError>> + 'a {
+        data.patterns
+            .date_time
+            .available_formats
             .iter()
-            .map(|string_skeleton| Skeleton::try_from(*string_skeleton))
+            .map(|tuple| Skeleton::try_from(tuple))
     }
 
-    fn get_valid_skeletons() -> impl Iterator<Item = Skeleton> {
-        get_skeletons()
+    fn get_valid_skeletons<'a>(
+        data: &'a provider::gregory::DatesV1,
+    ) -> impl Iterator<Item = Skeleton> + 'a {
+        get_skeletons(data)
             .filter(|skeleton| skeleton.is_ok())
             .map(|skeleton| skeleton.unwrap())
+    }
+
+    fn get_skeleton_with_fake_pattern(skeleton_string: &'static str) -> Skeleton {
+        let fake_pattern = Cow::from("FAKE");
+        let tuple: SkeletonStringTuple = (Cow::Borrowed(skeleton_string), fake_pattern);
+        Skeleton::try_from(&tuple).expect("Unable to generate a Skeleton")
     }
 
     #[test]
@@ -556,8 +526,11 @@ mod test {
         // Generated with:
         // https://gist.github.com/gregtatum/1d76bbdb87132f71a969a10f0c1d2d9c
 
+        let fake_pattern_string = Cow::from("FAKE");
         for string_skeleton in &STRING_SKELETONS {
-            let skeleton = Skeleton::try_from(*string_skeleton);
+            let tuple: SkeletonStringTuple =
+                (Cow::Borrowed(string_skeleton), fake_pattern_string.clone());
+            let skeleton = Skeleton::try_from(&tuple);
             match skeleton {
                 Ok(skeleton) => {
                     eprintln!("{:?} {:#?}", string_skeleton, skeleton);
@@ -573,19 +546,67 @@ mod test {
     }
 
     #[test]
-    fn test_skeleton_serialization() {
-        let parsed: Skeleton = serde_json::from_str("\"MMMMEEEEd\"").unwrap();
-        assert_eq!(serde_json::to_string(&parsed).unwrap(), r#""MMMMEEEEd""#);
+    fn test_skeleton_deserialization() {
+        // TODO - Write a real assertion here. Serialization was removed.
+        assert_eq!(
+            get_skeleton_with_fake_pattern("MMMMEEEEd"),
+            Skeleton {
+                fields: vec![
+                    Field {
+                        symbol: Month::Format.into(),
+                        length: FieldLength::Wide
+                    },
+                    Field {
+                        symbol: Weekday::Format.into(),
+                        length: FieldLength::Wide
+                    },
+                    Field {
+                        symbol: Day::DayOfMonth.into(),
+                        length: FieldLength::One
+                    }
+                ],
+                pattern_string: Cow::Borrowed("FAKE"),
+                fields_by_type: FieldsByType {
+                    year: None,
+                    month: Some(FieldIndex(0)),
+                    day: Some(FieldIndex(2)),
+                    weekday: Some(FieldIndex(1)),
+                    day_period: None,
+                    hour: None,
+                    minute: None,
+                    second: None
+                }
+            }
+        );
+    }
+
+    fn get_data_provider() -> Cow<'static, DatesV1> {
+        let provider = icu_testdata::get_provider();
+        let langid = langid!("en");
+        provider
+            .load_payload(&DataRequest {
+                resource_path: ResourcePath {
+                    key: GREGORY_V1,
+                    options: ResourceOptions {
+                        variant: None,
+                        langid: Some(langid),
+                    },
+                },
+            })
+            .unwrap()
+            .take_payload()
+            .unwrap()
     }
 
     #[test]
     fn test_skeleton_matching() {
         let components = components::Bag::default();
-        let skeletons = get_valid_skeletons();
+        let data_provider = get_data_provider();
+        let skeletons = get_valid_skeletons(&data_provider);
 
         match get_best_skeleton(skeletons, &components) {
             BestSkeleton::AllFieldsMatch(skeleton) => {
-                assert_eq!(serde_json::to_string(&skeleton).unwrap(), r#""yMMMM""#)
+                assert_eq!(skeleton.pattern_string, "MMMM y")
             }
             _ => panic!(),
         };
