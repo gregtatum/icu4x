@@ -2,14 +2,17 @@
 // called LICENSE at the top level of the ICU4X source tree
 // (online at: https://github.com/unicode-org/icu4x/blob/master/LICENSE ).
 
+// TODO - Remove this when ready to land.
+#![allow(dead_code)]
+
 use crate::fields::{self, Field, FieldLength, FieldSymbol, LengthError, SymbolError};
 use crate::options::components;
 use serde::{
     de::{self, Deserialize, Deserializer, Unexpected, Visitor},
     ser::{self, Serialize},
 };
+use std::convert::TryFrom;
 use std::fmt;
-use std::{collections::HashMap, convert::TryFrom};
 
 #[derive(Debug)]
 struct FieldIndex(usize);
@@ -17,20 +20,20 @@ struct FieldIndex(usize);
 #[derive(Debug)]
 pub struct Skeleton {
     fields: Vec<Field>,
-    by_field_type: HashMap<FieldType, FieldIndex>,
+    fields_by_type: FieldsByType,
 }
 
 impl Skeleton {
     pub fn new() -> Skeleton {
         Skeleton {
             fields: Vec::new(),
-            by_field_type: HashMap::new(),
+            fields_by_type: FieldsByType::new(),
         }
     }
 
     pub fn add_field(&mut self, symbol: FieldSymbol, length: u8) -> Result<(), SkeletonError> {
-        self.by_field_type
-            .insert(FieldType::from(symbol), FieldIndex(self.fields.len()));
+        self.fields_by_type
+            .set(&symbol, FieldIndex(self.fields.len()));
 
         self.fields.push(Field {
             symbol,
@@ -40,23 +43,76 @@ impl Skeleton {
         Ok(())
     }
 
-    pub fn get_field_by_type(&self, field_type: &FieldType) -> Option<&Field> {
-        self.by_field_type
-            .get(field_type)
+    fn get_field(&self, field: &Option<FieldIndex>) -> Option<&Field> {
+        field
+            .as_ref()
             .map(|FieldIndex(index)| self.fields.get(*index).expect("Expected to find a field."))
+    }
+
+    fn get_year(&self) -> Option<&Field> {
+        self.get_field(&self.fields_by_type.year)
+    }
+    fn get_month(&self) -> Option<&Field> {
+        self.get_field(&self.fields_by_type.month)
+    }
+    fn get_day(&self) -> Option<&Field> {
+        self.get_field(&self.fields_by_type.day)
+    }
+    fn get_weekday(&self) -> Option<&Field> {
+        self.get_field(&self.fields_by_type.weekday)
+    }
+    fn get_day_period(&self) -> Option<&Field> {
+        self.get_field(&self.fields_by_type.day_period)
+    }
+    fn get_hour(&self) -> Option<&Field> {
+        self.get_field(&self.fields_by_type.hour)
+    }
+    fn get_minute(&self) -> Option<&Field> {
+        self.get_field(&self.fields_by_type.minute)
+    }
+    fn get_second(&self) -> Option<&Field> {
+        self.get_field(&self.fields_by_type.second)
     }
 }
 
-#[derive(Debug, Eq, Hash, PartialEq)]
-pub enum FieldType {
-    Year,
-    Month,
-    Day,
-    Weekday,
-    DayPeriod,
-    Hour,
-    Minute,
-    Second,
+#[derive(Debug)]
+pub struct FieldsByType {
+    year: Option<FieldIndex>,
+    month: Option<FieldIndex>,
+    day: Option<FieldIndex>,
+    weekday: Option<FieldIndex>,
+    day_period: Option<FieldIndex>,
+    hour: Option<FieldIndex>,
+    minute: Option<FieldIndex>,
+    second: Option<FieldIndex>,
+}
+
+impl FieldsByType {
+    fn new() -> FieldsByType {
+        FieldsByType {
+            year: None,
+            month: None,
+            day: None,
+            weekday: None,
+            day_period: None,
+            hour: None,
+            minute: None,
+            second: None,
+        }
+    }
+
+    fn set(&mut self, symbol: &FieldSymbol, index: FieldIndex) {
+        match symbol {
+            FieldSymbol::Year(_) => self.year = Some(index),
+            FieldSymbol::Month(_) => self.month = Some(index),
+            FieldSymbol::Day(_) => self.day = Some(index),
+            FieldSymbol::Weekday(_) => self.weekday = Some(index),
+            FieldSymbol::DayPeriod(_) => self.day_period = Some(index),
+            FieldSymbol::Hour(_) => self.hour = Some(index),
+            FieldSymbol::Minute => self.minute = Some(index),
+            FieldSymbol::Second(_) => self.second = Some(index),
+        }
+    }
 }
 
 impl From<FieldSymbol> for char {
@@ -97,21 +153,6 @@ impl From<FieldSymbol> for char {
                 fields::Second::FractionalSecond => 'S',
                 fields::Second::Millisecond => 'A',
             },
-        }
-    }
-}
-
-impl From<FieldSymbol> for FieldType {
-    fn from(symbol: FieldSymbol) -> Self {
-        match symbol {
-            FieldSymbol::Year(_) => FieldType::Year,
-            FieldSymbol::Month(_) => FieldType::Month,
-            FieldSymbol::Day(_) => FieldType::Day,
-            FieldSymbol::Weekday(_) => FieldType::Weekday,
-            FieldSymbol::DayPeriod(_) => FieldType::DayPeriod,
-            FieldSymbol::Hour(_) => FieldType::Hour,
-            FieldSymbol::Minute => FieldType::Minute,
-            FieldSymbol::Second(_) => FieldType::Second,
         }
     }
 }
@@ -325,7 +366,7 @@ pub fn get_best_skeleton(
         let mut distance: u16 = 0;
 
         if let Some(year) = components.year {
-            distance += match skeleton.get_field_by_type(&FieldType::Year) {
+            distance += match skeleton.get_year() {
                 Some(skeleton_field) => {
                     match skeleton_field.symbol {
                         FieldSymbol::Year(fields::Year::Calendar) => match skeleton_field.length {
@@ -356,7 +397,7 @@ pub fn get_best_skeleton(
         }
 
         if let Some(month) = components.month {
-            distance += match skeleton.get_field_by_type(&FieldType::Month) {
+            distance += match skeleton.get_month() {
                 Some(skeleton_field) => match skeleton_field.symbol {
                     FieldSymbol::Month(fields::Month::Format) => {
                         if month.matches_field_length(skeleton_field.length) {
@@ -534,16 +575,6 @@ mod test {
     #[test]
     fn test_skeleton_serialization() {
         let parsed: Skeleton = serde_json::from_str("\"MMMMEEEEd\"").unwrap();
-
-        // TODO - Is it worth doing an equality check here? HashMap doesn't support this.
-        // let mut expected = Skeleton::new();
-
-        // expected.add_field(FieldSymbol::from(fields::Day::DayOfMonth), 1);
-        // expected.add_field(FieldSymbol::from(fields::Weekday::Format), 4);
-        // expected.add_field(FieldSymbol::from(fields::Month::Format), 4);
-
-        // assert_eq!(parsed, expected);
-
         assert_eq!(serde_json::to_string(&parsed).unwrap(), r#""MMMMEEEEd""#);
     }
 
