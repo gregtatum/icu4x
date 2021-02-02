@@ -138,10 +138,254 @@
       "short": "HH:mm"
     },
     "date_time": {
-      "full": "{1}, {0}",
-      "long": "{1}, {0}",
-      "medium": "{1} {0}",
-      "short": "{1} {0}"
+      "style_patterns": {
+        "full": "{1}, {0}",
+        "long": "{1}, {0}",
+        "medium": "{1} {0}",
+        "short": "{1} {0}"
+      },
+      "available_formats": [
+        [
+          "Bh",
+          "h B"
+        ],
+        [
+          "Bhm",
+          "h:mm B"
+        ],
+        [
+          "Bhms",
+          "h:mm:ss B"
+        ],
+        [
+          "d",
+          "d"
+        ],
+        [
+          "E",
+          "ccc"
+        ],
+        [
+          "EBhm",
+          "E h:mm B"
+        ],
+        [
+          "EBhms",
+          "E h:mm:ss B"
+        ],
+        [
+          "Ed",
+          "E d"
+        ],
+        [
+          "Ehm",
+          "E, h:mm a"
+        ],
+        [
+          "EHm",
+          "E, HH:mm"
+        ],
+        [
+          "Ehms",
+          "E, h:mm:ss a"
+        ],
+        [
+          "EHms",
+          "E, HH:mm:ss"
+        ],
+        [
+          "Gy",
+          "y G"
+        ],
+        [
+          "GyMMM",
+          "MMM y G"
+        ],
+        [
+          "GyMMMd",
+          "d MMM y G"
+        ],
+        [
+          "GyMMMEd",
+          "E, d 'de' MMM 'de' y G"
+        ],
+        [
+          "GyMMMM",
+          "MMMM 'de' y G"
+        ],
+        [
+          "GyMMMMd",
+          "d 'de' MMMM 'de' y G"
+        ],
+        [
+          "GyMMMMEd",
+          "E, d 'de' MMMM 'de' y G"
+        ],
+        [
+          "h",
+          "h a"
+        ],
+        [
+          "H",
+          "HH"
+        ],
+        [
+          "hm",
+          "h:mm a"
+        ],
+        [
+          "Hm",
+          "HH:mm"
+        ],
+        [
+          "hms",
+          "hh:mm:ss"
+        ],
+        [
+          "Hms",
+          "HH:mm:ss"
+        ],
+        [
+          "hmsv",
+          "h:mm:ss a v"
+        ],
+        [
+          "Hmsv",
+          "HH:mm:ss v"
+        ],
+        [
+          "hmsvvvv",
+          "h:mm:ss a (vvvv)"
+        ],
+        [
+          "Hmsvvvv",
+          "HH:mm:ss (vvvv)"
+        ],
+        [
+          "hmv",
+          "h:mm a v"
+        ],
+        [
+          "Hmv",
+          "HH:mm v"
+        ],
+        [
+          "M",
+          "L"
+        ],
+        [
+          "Md",
+          "d/M"
+        ],
+        [
+          "MEd",
+          "E d-M"
+        ],
+        [
+          "MMd",
+          "d/M"
+        ],
+        [
+          "MMdd",
+          "d/M"
+        ],
+        [
+          "MMM",
+          "LLL"
+        ],
+        [
+          "MMMd",
+          "d MMM"
+        ],
+        [
+          "MMMdd",
+          "dd-MMM"
+        ],
+        [
+          "MMMEd",
+          "E, d MMM"
+        ],
+        [
+          "MMMMd",
+          "d 'de' MMMM"
+        ],
+        [
+          "MMMMEd",
+          "E, d 'de' MMMM"
+        ],
+        [
+          "MMMMW-count-one",
+          "'semana' W 'de' MMMM"
+        ],
+        [
+          "MMMMW-count-other",
+          "'semana' W 'de' MMMM"
+        ],
+        [
+          "ms",
+          "mm:ss"
+        ],
+        [
+          "y",
+          "y"
+        ],
+        [
+          "yM",
+          "M-y"
+        ],
+        [
+          "yMd",
+          "d/M/y"
+        ],
+        [
+          "yMEd",
+          "E, d/M/y"
+        ],
+        [
+          "yMM",
+          "M/y"
+        ],
+        [
+          "yMMM",
+          "MMM y"
+        ],
+        [
+          "yMMMd",
+          "d 'de' MMM 'de' y"
+        ],
+        [
+          "yMMMEd",
+          "E, d MMM y"
+        ],
+        [
+          "yMMMM",
+          "MMMM 'de' y"
+        ],
+        [
+          "yMMMMd",
+          "d 'de' MMMM 'de' y"
+        ],
+        [
+          "yMMMMEd",
+          "EEE, d 'de' MMMM 'de' y"
+        ],
+        [
+          "yQQQ",
+          "QQQ 'de' y"
+        ],
+        [
+          "yQQQQ",
+          "QQQQ 'de' y"
+        ],
+        [
+          "yw-count-one",
+          "'semana' w 'de' Y"
+        ],
+        [
+          "yw-count-other",
+          "'semana' w 'de' Y"
+        ]
+      ]
     }
   }
 }
