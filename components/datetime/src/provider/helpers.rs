@@ -4,15 +4,17 @@
 use crate::date;
 use crate::error::DateTimeFormatError;
 use crate::fields;
-use crate::options::{style, DateTimeFormatOptions};
+use crate::options::{components, style, DateTimeFormatOptions};
 use crate::pattern::Pattern;
 use crate::provider;
+use crate::skeleton;
 use std::borrow::Cow;
 
 type Result<T> = std::result::Result<T, DateTimeFormatError>;
 
 pub trait DateTimeDates {
     fn get_pattern_for_options(&self, options: &DateTimeFormatOptions) -> Result<Option<Pattern>>;
+    fn get_pattern_for_components_bag(&self, style: &components::Bag) -> Result<Option<Pattern>>;
     fn get_pattern_for_style_bag(&self, style: &style::Bag) -> Result<Option<Pattern>>;
     fn get_pattern_for_date_style(&self, style: style::Date) -> Result<Pattern>;
     fn get_pattern_for_time_style(&self, style: style::Time) -> Result<Pattern>;
@@ -47,8 +49,21 @@ impl DateTimeDates for provider::gregory::DatesV1 {
     fn get_pattern_for_options(&self, options: &DateTimeFormatOptions) -> Result<Option<Pattern>> {
         match options {
             DateTimeFormatOptions::Style(bag) => self.get_pattern_for_style_bag(bag),
-            DateTimeFormatOptions::Components(_) => unimplemented!(),
+            DateTimeFormatOptions::Components(bag) => self.get_pattern_for_components_bag(bag),
         }
+    }
+
+    fn get_pattern_for_components_bag(
+        &self,
+        components: &components::Bag,
+    ) -> Result<Option<Pattern>> {
+        // Not all skeletons are currently supported.
+        let skeletons = skeleton::get_valid_skeletons(&self);
+        Ok(match skeleton::get_best_skeleton(skeletons, &components) {
+            skeleton::BestSkeleton::AllFieldsMatch(skeleton)
+            | skeleton::BestSkeleton::MissingFields(skeleton) => Some(skeleton.get_pattern()?),
+            skeleton::BestSkeleton::NoMatch => None,
+        })
     }
 
     fn get_pattern_for_style_bag(&self, style: &style::Bag) -> Result<Option<Pattern>> {

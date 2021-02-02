@@ -20,7 +20,10 @@ use std::{borrow::Cow, fmt::Write};
 fn test_fixture(fixture_name: &str) {
     let provider = icu_testdata::get_provider();
 
-    for fx in fixtures::get_fixture(fixture_name).unwrap().0 {
+    for fx in fixtures::get_fixture(fixture_name)
+        .expect("Unable to get fixture.")
+        .0
+    {
         let langid = fx.input.locale.parse().unwrap();
         let options = fixtures::get_options(&fx.input.options);
         let dtf = DateTimeFormat::try_new(langid, &provider, &options).unwrap();
@@ -109,7 +112,6 @@ fn test_style_fixtures() {
 // Expected panic: 'not implemented', components/datetime/src/provider.rs:49:53
 // https://github.com/unicode-org/icu4x/issues/272
 #[test]
-#[should_panic]
 fn test_components_fixtures() {
     test_fixture("components");
 }

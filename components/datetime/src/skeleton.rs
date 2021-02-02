@@ -5,8 +5,11 @@
 // TODO - Remove this when ready to land.
 #![allow(dead_code)]
 
-use crate::fields::{self, Field, FieldLength, FieldSymbol, LengthError, SymbolError};
-use crate::options::components;
+use crate::{
+    fields::{self, Field, FieldLength, FieldSymbol, LengthError, SymbolError},
+    provider,
+};
+use crate::{options::components, pattern};
 use std::{borrow::Cow, convert::TryFrom};
 
 #[derive(Debug, PartialEq)]
@@ -28,7 +31,7 @@ impl Skeleton {
         }
     }
 
-    pub fn add_field(&mut self, symbol: FieldSymbol, length: u8) -> Result<(), SkeletonError> {
+    pub fn add_field(&mut self, symbol: FieldSymbol, length: u8) -> Result<(), Error> {
         self.fields_by_type
             .set(&symbol, FieldIndex(self.fields.len()));
 
@@ -38,6 +41,10 @@ impl Skeleton {
         });
 
         Ok(())
+    }
+
+    pub fn get_pattern(&self) -> Result<pattern::Pattern, pattern::Error> {
+        pattern::Pattern::from_bytes(&self.pattern_string)
     }
 
     fn get_field(&self, field: &Option<FieldIndex>) -> Option<&Field> {
@@ -75,7 +82,7 @@ impl Skeleton {
 pub type SkeletonStringTuple = (Cow<'static, str>, Cow<'static, str>);
 
 impl TryFrom<&SkeletonStringTuple> for Skeleton {
-    type Error = SkeletonError;
+    type Error = Error;
     fn try_from(tuple: &SkeletonStringTuple) -> Result<Self, Self::Error> {
         let (skeleton_string, pattern_string) = tuple;
         let mut vec = Vec::new();
@@ -100,7 +107,7 @@ impl TryFrom<&SkeletonStringTuple> for Skeleton {
                     | b'w'
                     // "-count-*" and "-alt-variant"
                     | b'-' => {
-                        return Err(SkeletonError::UnimplementedField(byte as char))
+                        return Err(Error::UnimplementedField(byte as char))
                     }
                     _ => return Err(err.into()),
                 },
@@ -224,22 +231,22 @@ impl From<&Skeleton> for String {
 }
 
 #[derive(Debug)]
-pub enum SkeletonError {
+pub enum Error {
     FieldLengthTooLong,
     SymbolUnknown(char),
     UnimplementedField(char),
 }
 
-impl From<LengthError> for SkeletonError {
+impl From<LengthError> for Error {
     fn from(_: LengthError) -> Self {
-        SkeletonError::FieldLengthTooLong
+        Error::FieldLengthTooLong
     }
 }
 
-impl From<SymbolError> for SkeletonError {
+impl From<SymbolError> for Error {
     fn from(symbol_error: SymbolError) -> Self {
         let SymbolError::Unknown(ch) = symbol_error;
-        SkeletonError::SymbolUnknown(ch as char)
+        Error::SymbolUnknown(ch as char)
     }
 }
 
@@ -384,6 +391,24 @@ pub fn get_best_skeleton(
     }
 }
 
+pub fn get_skeletons<'a>(
+    data: &'a provider::gregory::DatesV1,
+) -> impl Iterator<Item = Result<Skeleton, Error>> + 'a {
+    data.patterns
+        .date_time
+        .available_formats
+        .iter()
+        .map(|tuple| Skeleton::try_from(tuple))
+}
+
+pub fn get_valid_skeletons<'a>(
+    data: &'a provider::gregory::DatesV1,
+) -> impl Iterator<Item = Skeleton> + 'a {
+    get_skeletons(data)
+        .filter(|skeleton| skeleton.is_ok())
+        .map(|skeleton| skeleton.unwrap())
+}
+
 #[cfg(test)]
 mod test {
 
@@ -392,7 +417,7 @@ mod test {
 
     use crate::{
         fields::{Day, Month, Weekday},
-        provider::{self, gregory::DatesV1, key::GREGORY_V1},
+        provider::{gregory::DatesV1, key::GREGORY_V1},
     };
     use icu_provider::DataProvider;
 
@@ -496,24 +521,6 @@ mod test {
         "yMEd-alt-variant",
     ];
 
-    fn get_skeletons<'a>(
-        data: &'a provider::gregory::DatesV1,
-    ) -> impl Iterator<Item = Result<Skeleton, SkeletonError>> + 'a {
-        data.patterns
-            .date_time
-            .available_formats
-            .iter()
-            .map(|tuple| Skeleton::try_from(tuple))
-    }
-
-    fn get_valid_skeletons<'a>(
-        data: &'a provider::gregory::DatesV1,
-    ) -> impl Iterator<Item = Skeleton> + 'a {
-        get_skeletons(data)
-            .filter(|skeleton| skeleton.is_ok())
-            .map(|skeleton| skeleton.unwrap())
-    }
-
     fn get_skeleton_with_fake_pattern(skeleton_string: &'static str) -> Skeleton {
         let fake_pattern = Cow::from("FAKE");
         let tuple: SkeletonStringTuple = (Cow::Borrowed(skeleton_string), fake_pattern);
@@ -535,7 +542,7 @@ mod test {
                 Ok(skeleton) => {
                     eprintln!("{:?} {:#?}", string_skeleton, skeleton);
                 }
-                Err(SkeletonError::UnimplementedField(ch)) => {
+                Err(Error::UnimplementedField(ch)) => {
                     eprintln!("{:?} Unimplemented Field{:?}", string_skeleton, ch);
                 }
                 Err(err) => {
