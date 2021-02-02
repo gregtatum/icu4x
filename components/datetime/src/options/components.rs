@@ -481,7 +481,7 @@ mod test {
 
             preferences: None,
         };
-        assert_eq!(serde_json::to_string(&bag).unwrap(), "\"\"");
+        assert_eq!(serde_json::to_string(&bag).unwrap(), "\"GyMdkms\"");
     }
 
     #[test]
@@ -501,7 +501,7 @@ mod test {
 
             preferences: None,
         };
-        assert_eq!(serde_json::to_string(&bag).unwrap(), "\"\"");
+        assert_eq!(serde_json::to_string(&bag).unwrap(), "\"GGGGyyMMddkkmmss\"");
     }
 
     #[test]
@@ -521,7 +521,7 @@ mod test {
 
             preferences: None,
         };
-        assert_eq!(serde_json::to_string(&bag).unwrap(), "\"\"");
+        assert_eq!(serde_json::to_string(&bag).unwrap(), "\"GGGGGMMMM\"");
     }
 
     #[test]
@@ -541,6 +541,6 @@ mod test {
 
             preferences: None,
         };
-        assert_eq!(serde_json::to_string(&bag).unwrap(), "\"\"");
+        assert_eq!(serde_json::to_string(&bag).unwrap(), "\"MMM\"");
     }
 }

@@ -543,7 +543,7 @@ mod test {
 
         // assert_eq!(parsed, expected);
 
-        assert_eq!(serde_json::to_string(&parsed).unwrap(), r#""dMMMMEEEE""#);
+        assert_eq!(serde_json::to_string(&parsed).unwrap(), r#""MMMMEEEEd""#);
     }
 
     #[test]

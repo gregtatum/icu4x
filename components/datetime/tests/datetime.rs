@@ -63,7 +63,13 @@ fn test_dayperiod_patterns() {
             .unwrap()
             .take_payload()
             .unwrap();
-        *data.to_mut().patterns.date_time.long.to_mut() = String::from("{0}");
+        *data
+            .to_mut()
+            .patterns
+            .date_time
+            .style_patterns
+            .long
+            .to_mut() = String::from("{0}");
         for test_case in &test.test_cases {
             for dt_input in &test_case.date_times {
                 let date_time: MockDateTime = dt_input.parse().unwrap();
