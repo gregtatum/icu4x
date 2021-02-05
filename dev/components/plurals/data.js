@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1611256968099,
+  "lastUpdate": 1612563928202,
   "repoUrl": "https://github.com/gregtatum/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -293,6 +293,48 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 113037,
             "range": "± 8102",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ae89da479dfbbcfc73fbaa977cd3f4ecfd0e4fac",
+          "message": "Allow some clippy lints (#474)",
+          "timestamp": "2021-02-02T17:40:53-08:00",
+          "tree_id": "b24a02430c995fda5f39e5982049523f7037643c",
+          "url": "https://github.com/gregtatum/icu4x/commit/ae89da479dfbbcfc73fbaa977cd3f4ecfd0e4fac"
+        },
+        "date": 1612563927750,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1457,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6496,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 97987,
+            "range": "± 406",
             "unit": "ns/iter"
           }
         ]
