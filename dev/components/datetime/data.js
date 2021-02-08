@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1612563932616,
+  "lastUpdate": 1612802117295,
   "repoUrl": "https://github.com/gregtatum/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -239,6 +239,36 @@ window.BENCHMARK_DATA = {
             "name": "datetime/overview",
             "value": 908370,
             "range": "± 1620",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "gregtatum@users.noreply.github.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cd3d48cd32dbff817b878cff399e97493313945b",
+          "message": "Merge pull request #1 from gregtatum/memory-benchmark-upload-fix-testing\n\nMemory benchmark upload fix testing",
+          "timestamp": "2021-02-08T10:28:59-06:00",
+          "tree_id": "1f3a9aeeface922dce854ad4cfebcb96334965a8",
+          "url": "https://github.com/gregtatum/icu4x/commit/cd3d48cd32dbff817b878cff399e97493313945b"
+        },
+        "date": 1612802115251,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/overview",
+            "value": 1122694,
+            "range": "± 61780",
             "unit": "ns/iter"
           }
         ]
