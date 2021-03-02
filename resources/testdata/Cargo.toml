@@ -113,7 +113,10 @@ extra_features = [
 
 [dependencies]
 icu_provider = { version = "0.1", path = "../../components/provider" }
-icu_provider_fs = { version = "0.1", path = "../../components/provider_fs" }
+# See: https://github.com/unicode-org/icu4x/issues/491#issuecomment-787053094
+# Uncomment the following line to easily test the entire repo against bincode.
+#icu_provider_fs = { version = "0.1", path = "../../components/provider_fs"] }
+icu_provider_fs = { version = "0.1", path = "../../components/provider_fs", features = ["bincode"] }
 icu_locid = { version = "0.1", path = "../../components/locid" }
 
 # Dependencies for the "metadata" feature
